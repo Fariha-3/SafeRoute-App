@@ -1,4 +1,70 @@
-<m-container>
-    <br><br>
-    Feature 1
-</m-container>
+  <div class="page">
+    <h1>SafeRoute Account</h1>
+
+    <p class="success" *ngIf="message">{{ message }}</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <section class="card" *ngIf="!currentUser">
+      <h2>Register / Login</h2>
+
+      <label>Name</label>
+      <input type="text" [(ngModel)]="name" placeholder="Enter your name">
+
+      <label>Email</label>
+      <input type="email" [(ngModel)]="email" placeholder="Enter your email">
+
+      <label>Password</label>
+      <input type="password" [(ngModel)]="password" placeholder="Enter your password">
+
+      <div class="buttons">
+        <button (click)="register()">Register</button>
+        <button (click)="login()">Login</button>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="currentUser && profile">
+      <h2>My Profile</h2>
+
+      <p><strong>Name:</strong> {{ profile.name }}</p>
+      <p><strong>Email:</strong> {{ profile.email }}</p>
+      <p><strong>Total Reports:</strong> {{ profile.reportCount }}</p>
+      <p><strong>Verified Reports:</strong> {{ profile.verifiedReportCount }}</p>
+      <p><strong>Upvotes Received:</strong> {{ profile.upvotesReceived }}</p>
+      <p><strong>Safety Contribution Score:</strong> {{ profile.safetyScore }}</p>
+
+      <button class="logout" (click)="logout()">Logout</button>
+    </section>
+
+    <section class="card" *ngIf="currentUser">
+      <h2>Community Verification</h2>
+
+      <p *ngIf="reports.length === 0">
+        No reports found yet. Member 2 will add the report form later.
+      </p>
+
+      <div class="report" *ngFor="let report of reports">
+        <h3>{{ report.category }}</h3>
+
+        <p><strong>Severity:</strong> {{ report.severity }}</p>
+        <p><strong>Description:</strong> {{ report.description }}</p>
+        <p><strong>Upvotes:</strong> {{ report.upvoteCount }}</p>
+        <p><strong>Disputes:</strong> {{ report.disputeCount }}</p>
+
+        <p class="verified" *ngIf="report.verified">Verified ✅</p>
+        <p class="not-verified" *ngIf="!report.verified">Not Verified</p>
+
+        <button (click)="upvote(report.id)">Upvote</button>
+        <button (click)="dispute(report.id)">Dispute</button>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="currentUser">
+      <h2>Leaderboard</h2>
+
+      <ol>
+        <li *ngFor="let user of leaderboard">
+          {{ user.name }} — {{ user.safetyScore }} points
+        </li>
+      </ol>
+    </section>
+  </div>
