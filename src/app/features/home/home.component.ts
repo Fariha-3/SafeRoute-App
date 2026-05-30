@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MContainerComponent } from '../../m-framework/components/m-container/m-container.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -12,8 +13,11 @@ import { FormsModule } from '@angular/forms';
 })
 export class HomeComponent {
   
-  constructor() 
-  {
-    
+  constructor(private router:Router) 
+  {    
   }
+  navigateToMap() {
+    this.router.navigate(['/map']);
+  }
+
 }
