@@ -14,7 +14,7 @@
   <p class="success" *ngIf="message">{{ message }}</p>
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-  <!-- FIRST PAGE: LOGIN + REGISTER -->
+  <!-- LOGIN / REGISTER FIRST PAGE -->
   <main class="auth-page" *ngIf="!currentUser">
 
     <section class="hero">
@@ -32,10 +32,18 @@
         <p class="card-subtitle">Already have an account?</p>
 
         <label>Email</label>
-        <input type="email" [(ngModel)]="loginEmail" placeholder="Enter your email">
+        <input
+          type="email"
+          [(ngModel)]="loginEmail"
+          placeholder="Enter your email"
+        >
 
         <label>Password</label>
-        <input type="password" [(ngModel)]="loginPassword" placeholder="Enter your password">
+        <input
+          type="password"
+          [(ngModel)]="loginPassword"
+          placeholder="Enter your password"
+        >
 
         <button class="primary-btn" (click)="login()">Login</button>
       </div>
@@ -45,13 +53,25 @@
         <p class="card-subtitle">Create a new SafeRoute account.</p>
 
         <label>Name</label>
-        <input type="text" [(ngModel)]="registerName" placeholder="Enter your name">
+        <input
+          type="text"
+          [(ngModel)]="registerName"
+          placeholder="Enter your name"
+        >
 
         <label>Email</label>
-        <input type="email" [(ngModel)]="registerEmail" placeholder="Enter your email">
+        <input
+          type="email"
+          [(ngModel)]="registerEmail"
+          placeholder="Enter your email"
+        >
 
         <label>Password</label>
-        <input type="password" [(ngModel)]="registerPassword" placeholder="Minimum 6 characters">
+        <input
+          type="password"
+          [(ngModel)]="registerPassword"
+          placeholder="Minimum 6 characters"
+        >
 
         <button class="secondary-btn" (click)="register()">Register</button>
       </div>
@@ -59,7 +79,7 @@
     </section>
   </main>
 
-  <!-- HOME PAGE AFTER LOGIN -->
+  <!-- HOME DASHBOARD AFTER LOGIN -->
   <main class="home-page" *ngIf="currentUser">
 
     <section class="welcome-card">
@@ -68,28 +88,28 @@
     </section>
 
     <section class="quick-actions">
-      <a routerLink="/feature2" class="action-card">
+      <a routerLink="/crowdsource" class="action-card">
         <span>📝</span>
         <h3>Submit Report</h3>
         <p>Create a new safety report.</p>
       </a>
 
-      <a routerLink="/feature3" class="action-card">
+      <a routerLink="/heatmap" class="action-card">
         <span>🗺️</span>
         <h3>Heatmap</h3>
         <p>View unsafe zones on the map.</p>
       </a>
 
-      <a routerLink="/feature3" class="action-card">
+      <a routerLink="/viewreports" class="action-card">
         <span>📍</span>
         <h3>View Reports</h3>
         <p>Browse reported hazards.</p>
       </a>
 
-      <a routerLink="/feature5" class="action-card">
+      <a routerLink="/heatmap" class="action-card">
         <span>🧭</span>
         <h3>Safe Route</h3>
-        <p>Find a safer route.</p>
+        <p>Route safety feature coming soon.</p>
       </a>
     </section>
 
@@ -149,7 +169,7 @@
       </div>
 
       <p class="empty-state" *ngIf="reports.length === 0">
-        No reports found yet. Member 2 will add the report form later.
+        No reports found yet. Submitted reports will appear here for community verification.
       </p>
 
       <div class="report-list">
