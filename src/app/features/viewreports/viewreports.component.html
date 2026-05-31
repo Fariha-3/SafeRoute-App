@@ -1,0 +1,12 @@
+<h2>All Safety Reports</h2>
+
+<div *ngFor="let r of reports" class="report-card">
+
+  <h3>{{ r.category }}</h3>
+  <p><b>Severity:</b> {{ r.severity }}</p>
+  <p>{{ r.description }}</p>
+  <small>{{ r.timestamp }}</small>
+
+</div>
+
+<button (click)="back()">Back</button>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { MContainerComponent } from '../../m-framework/components/m-container/m-container.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +19,19 @@ export class HomeComponent {
   }
   navigateToMap() {
     this.router.navigate(['/map']);
+
+  constructor(private router: Router) {}
+
+  addReport() {
+    this.router.navigate(['/crowdsource']);
+  }
+
+  viewReports() {
+    this.router.navigate(['/viewreports']);
+  }
+
+  viewHeatmap() {
+    this.router.navigate(['/heatmap']);
   }
 
 }

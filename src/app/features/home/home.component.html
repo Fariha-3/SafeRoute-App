@@ -1,5 +1,25 @@
 <m-container>
 <br><br>
-<button class = "btn btn-primary" (click)="navigateToMap()">Go to Map</button>
-</m-container>
 
+
+  <h1>Smart City Safety App</h1>
+
+  <p>
+    Welcome to the Smart City Safety Reporting System.
+  </p>
+
+  <button (click)="addReport()">
+    Submit Report
+  </button>
+
+  <button (click)="viewReports()">
+    View Reports
+  </button>
+
+  <button (click)="viewHeatmap()">
+    Safety Heatmap
+  </button>
+
+  <button class = "btn btn-primary" (click)="navigateToMap()">Go to Map</button>
+
+</m-container>
