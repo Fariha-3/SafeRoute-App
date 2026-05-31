@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import {MContainerComponent} from "../../m-framework/components/m-container/m-container.component";
+import { FirebaseService } from '../../m-framework/services/firebase.service';
 
 declare var google:any;
 interface SafetyReport {
-  id: string;
-  lat: number;
-  lng: number;
+  id?: string;
   category: string;
   severity: 'Low' | 'Medium' | 'High';
   description: string;
-  timestamp: number;
+  latitude: number;
+  longitude: number;
+  timestamp: string;
 }
 
 @Component({
@@ -28,9 +29,9 @@ export class MapComponent {
   reports: SafetyReport[] = [];
   reportCircles: any[] = [];
 
-  constructor(){
-    this.latitude = 0;
-    this.longitude = 0;
+  constructor(private firebase: FirebaseService) {
+  this.latitude = 0;
+  this.longitude = 0;
   }
 
   ngOnInit(){
@@ -64,53 +65,24 @@ export class MapComponent {
 
   this.addMarker();
 
-  // temporary dummy reports
-  this.createDummyReports();
-
-  // show reports on map
-  this.displayReportHeatmap();
+  this.loadReportsFromFirebase();
 }
 
-createDummyReports() {
-  this.reports = [
-    {
-      id: 'r1',
-      lat: this.latitude + 0.001,
-      lng: this.longitude + 0.001,
-      category: 'Poorly Lit Street',
-      severity: 'High',
-      description: 'Very dark street near parking area',
-      timestamp: Date.now()
-    },
-    {
-      id: 'r2',
-      lat: this.latitude + 0.0012,
-      lng: this.longitude + 0.0011,
-      category: 'Security Concern',
-      severity: 'High',
-      description: 'Suspicious activity reported nearby',
-      timestamp: Date.now()
-    },
-    {
-      id: 'r3',
-      lat: this.latitude - 0.001,
-      lng: this.longitude - 0.001,
-      category: 'Damaged Infrastructure',
-      severity: 'Medium',
-      description: 'Broken pavement near sidewalk',
-      timestamp: Date.now()
-    },
-    {
-      id: 'r4',
-      lat: this.latitude - 0.0015,
-      lng: this.longitude + 0.0008,
-      category: 'Environmental Hazard',
-      severity: 'Low',
-      description: 'Small water leakage on road',
-      timestamp: Date.now()
-    }
-  ];
+loadReportsFromFirebase() {
+  this.firebase.listenToList('reports', (data: SafetyReport[]) => {
+    console.log('Firebase reports on map:', data);
+
+    this.reports = data.filter(report =>
+      report.latitude &&
+      report.longitude &&
+      report.category &&
+      report.severity
+    );
+
+    this.displayReportHeatmap();
+  });
 }
+
 
 displayReportHeatmap() {
   // clear old circles
@@ -120,24 +92,30 @@ displayReportHeatmap() {
   this.reports.forEach(report => {
     let radius = 60;
     let opacity = 0.25;
+    let color = '#00aa00'; // Low = green
 
     if (report.severity === 'Medium') {
       radius = 90;
       opacity = 0.35;
+      color = '#ff9900'; // Medium = orange
     }
 
     if (report.severity === 'High') {
       radius = 130;
       opacity = 0.5;
+      color = '#ff0000'; // High = red
     }
 
     const circle = new google.maps.Circle({
+      strokeColor: color,
+      strokeOpacity: 0.8,
       strokeWeight: 1,
+      fillColor: color,
       fillOpacity: opacity,
       map: this.map,
       center: {
-        lat: report.lat,
-        lng: report.lng
+        lat: Number(report.latitude),
+        lng: Number(report.longitude)
       },
       radius: radius
     });
@@ -146,7 +124,8 @@ displayReportHeatmap() {
       alert(
         `Category: ${report.category}\n` +
         `Severity: ${report.severity}\n` +
-        `Description: ${report.description}`
+        `Description: ${report.description}\n` +
+        `Time: ${new Date(report.timestamp).toLocaleString()}`
       );
     });
 
@@ -154,16 +133,18 @@ displayReportHeatmap() {
   });
 }
 
-  addMarker()
-  {
-      const marker = new google.maps.Marker({
-      		position: {lat: this.latitude, lng: this.longitude},
-      		map: this.map
-    	});
-    return marker;
-  }
+addMarker() {
+  const marker = new google.maps.Marker({
+    position: {
+      lat: this.latitude,
+      lng: this.longitude
+    },
+    map: this.map,
+    title: 'Your Current Location'
+  });
 
-
+  return marker;
+}
 
 
 }
