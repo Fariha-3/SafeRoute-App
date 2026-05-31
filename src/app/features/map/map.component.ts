@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import {MContainerComponent} from "../../m-framework/components/m-container/m-container.component";
 import { FirebaseService } from '../../m-framework/services/firebase.service';
+import { CommonModule, Location } from '@angular/common';
+import { MAhaComponent } from "../../m-framework/components/m-aha/m-aha.component";
+import { FormsModule } from '@angular/forms';
 
 declare var google:any;
 interface SafetyReport {
@@ -16,7 +19,7 @@ interface SafetyReport {
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [MContainerComponent],
+  imports: [MContainerComponent, CommonModule, FormsModule],
   templateUrl: './map.component.html',
   styleUrl: './map.component.css'
 })
@@ -25,18 +28,72 @@ export class MapComponent {
   longitude: number;
   map!: any;
   mapElementRef!: HTMLElement;
-
+  selectedAreaReports: SafetyReport[] = [];
+  showReportBox: boolean = false;
   reports: SafetyReport[] = [];
-  reportCircles: any[] = [];
+  reportCircles: any[] = []
+  allReports: SafetyReport[] = [];
+  selectedCategory: string = 'All';
+  selectedSeverity: string = 'All';
+  selectedTimeRange: string = 'All';
+  filteredReports: SafetyReport[] = [];   // reports shown after Load Reports
+  showFilteredReportsBox: boolean = false; // filter results box
+  filterHidden: boolean = false;
 
-  constructor(private firebase: FirebaseService) {
+
+categories: string[] = [
+  'All',
+  'Poorly Lit Street',
+  'Damaged Infrastructure',
+  'Security Concern',
+  'Environmental Hazard'
+];
+
+severities: string[] = [
+  'All',
+  'Low',
+  'Medium',
+  'High'
+];
+
+timeRanges: string[] = [
+  'Last 24 Hours',
+  'Last Week',
+  'All'
+];
+
+  constructor(
+  private firebase: FirebaseService,
+  private location: Location,
+  private ngZone: NgZone
+) {
   this.latitude = 0;
   this.longitude = 0;
-  }
+}
+
+openAreaReports(report: SafetyReport) {
+  this.ngZone.run(() => {
+    this.selectedAreaReports = this.getReportsNearArea(report);
+
+    // close filtered report box if it is open
+    this.showFilteredReportsBox = false;
+
+    // open heat zone report box
+    this.showReportBox = true;
+  });
+}
+
+toggleFilter() {
+  this.filterHidden = !this.filterHidden;
+}
 
   ngOnInit(){
     this.getPosition();
   }
+
+  goBack() {
+  this.location.back();
+}
 
   getPosition()
   {
@@ -72,15 +129,66 @@ loadReportsFromFirebase() {
   this.firebase.listenToList('reports', (data: SafetyReport[]) => {
     console.log('Firebase reports on map:', data);
 
-    this.reports = data.filter(report =>
-      report.latitude &&
-      report.longitude &&
+    this.allReports = data.filter(report =>
+      report.latitude !== undefined &&
+      report.longitude !== undefined &&
       report.category &&
       report.severity
     );
 
+    // Heatmap should show from the beginning
+    this.reports = this.allReports;
+
     this.displayReportHeatmap();
   });
+}
+
+applyFilters() {
+  console.log('Load Reports clicked');
+
+  this.filteredReports = this.allReports.filter(report => {
+    const categoryMatch =
+      this.selectedCategory === 'All' ||
+      report.category === this.selectedCategory;
+
+    const severityMatch =
+      this.selectedSeverity === 'All' ||
+      report.severity === this.selectedSeverity;
+
+    const timeMatch = this.matchesTimeRange(report.timestamp);
+
+    return categoryMatch && severityMatch && timeMatch;
+  });
+
+  this.showFilteredReportsBox = true;
+
+  console.log('Filtered reports:', this.filteredReports);
+}
+
+
+
+matchesTimeRange(timestamp: string): boolean {
+  if (this.selectedTimeRange === 'All') {
+    return true;
+  }
+
+  const reportTime = new Date(timestamp).getTime();
+
+  if (isNaN(reportTime)) {
+    return false;
+  }
+
+  const now = Date.now();
+
+  if (this.selectedTimeRange === 'Last 24 Hours') {
+    return now - reportTime <= 24 * 60 * 60 * 1000;
+  }
+
+  if (this.selectedTimeRange === 'Last Week') {
+    return now - reportTime <= 7 * 24 * 60 * 60 * 1000;
+  }
+
+  return true;
 }
 
 
@@ -117,16 +225,17 @@ displayReportHeatmap() {
         lat: Number(report.latitude),
         lng: Number(report.longitude)
       },
-      radius: radius
+      radius: radius,
+      clickable: true,
+      zIndex: 20
     });
 
     circle.addListener('click', () => {
-      alert(
-        `Category: ${report.category}\n` +
-        `Severity: ${report.severity}\n` +
-        `Description: ${report.description}\n` +
-        `Time: ${new Date(report.timestamp).toLocaleString()}`
-      );
+      this.openAreaReports(report);
+    });
+
+    circle.addListener('dblclick', () => {
+      this.openAreaReports(report);
     });
 
     this.reportCircles.push(circle);
@@ -146,5 +255,52 @@ addMarker() {
   return marker;
 }
 
+getReportsNearArea(clickedReport: SafetyReport): SafetyReport[] {
+  const areaRadiusMeters = 200;
+
+  return this.reports.filter(report => {
+    const distance = this.calculateDistance(
+      clickedReport.latitude,
+      clickedReport.longitude,
+      report.latitude,
+      report.longitude
+    );
+
+    return distance <= areaRadiusMeters;
+  });
+}
+
+calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const earthRadius = 6371000;
+
+  const dLat = this.toRadians(lat2 - lat1);
+  const dLng = this.toRadians(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(this.toRadians(lat1)) *
+    Math.cos(this.toRadians(lat2)) *
+    Math.sin(dLng / 2) *
+    Math.sin(dLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return earthRadius * c;
+}
+
+toRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
+
+closeReportBox() {
+  this.showReportBox = false;
+  this.selectedAreaReports = [];
+}
+
+
+closeFilteredReportsBox() {
+  this.showFilteredReportsBox = false;
+  this.filteredReports = [];
+}
 
 }
