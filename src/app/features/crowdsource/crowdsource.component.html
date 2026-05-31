@@ -1,0 +1,40 @@
+<m-container>
+
+  <h2>Submit Safety Report</h2>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <div *ngIf="message" class="success">{{ message }}</div>
+
+  <label>Category</label>
+  <select [(ngModel)]="report.category">
+    <option value="">Select</option>
+    <option>Poorly Lit Street</option>
+    <option>Damaged Infrastructure</option>
+    <option>Security Concern</option>
+    <option>Environmental Hazard</option>
+  </select>
+
+  <br><br>
+
+  <label>Severity</label>
+  <select [(ngModel)]="report.severity">
+    <option value="">Select</option>
+    <option>Low</option>
+    <option>Medium</option>
+    <option>High</option>
+  </select>
+
+  <br><br>
+
+  <label>Description</label>
+  <textarea [(ngModel)]="report.description"></textarea>
+
+  <br><br>
+
+  <button (click)="addReport()">Submit</button>
+  <button (click)="back()">Back</button>
+
+</m-container>
+
+    
+
