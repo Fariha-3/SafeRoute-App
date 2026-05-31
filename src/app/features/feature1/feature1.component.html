@@ -1,70 +1,189 @@
-  <div class="page">
-    <h1>SafeRoute Account</h1>
+<div class="app-shell">
 
-    <p class="success" *ngIf="message">{{ message }}</p>
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <header class="top-bar">
+    <div>
+      <h1>SafeRoute</h1>
+      <p>Community-powered urban safety reporting</p>
+    </div>
 
-    <section class="card" *ngIf="!currentUser">
-      <h2>Register / Login</h2>
+    <button *ngIf="currentUser" class="logout-btn" (click)="logout()">
+      Logout
+    </button>
+  </header>
 
-      <label>Name</label>
-      <input type="text" [(ngModel)]="name" placeholder="Enter your name">
+  <p class="success" *ngIf="message">{{ message }}</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-      <label>Email</label>
-      <input type="email" [(ngModel)]="email" placeholder="Enter your email">
+  <!-- FIRST PAGE: LOGIN + REGISTER -->
+  <main class="auth-page" *ngIf="!currentUser">
 
-      <label>Password</label>
-      <input type="password" [(ngModel)]="password" placeholder="Enter your password">
+    <section class="hero">
+      <h2>Stay aware. Report hazards. Travel safer.</h2>
+      <p>
+        SafeRoute helps users report unsafe areas, verify community reports,
+        and access safer city navigation features.
+      </p>
+    </section>
 
-      <div class="buttons">
-        <button (click)="register()">Register</button>
-        <button (click)="login()">Login</button>
+    <section class="auth-grid">
+
+      <div class="auth-card">
+        <h2>Login</h2>
+        <p class="card-subtitle">Already have an account?</p>
+
+        <label>Email</label>
+        <input type="email" [(ngModel)]="loginEmail" placeholder="Enter your email">
+
+        <label>Password</label>
+        <input type="password" [(ngModel)]="loginPassword" placeholder="Enter your password">
+
+        <button class="primary-btn" (click)="login()">Login</button>
       </div>
+
+      <div class="auth-card">
+        <h2>Register</h2>
+        <p class="card-subtitle">Create a new SafeRoute account.</p>
+
+        <label>Name</label>
+        <input type="text" [(ngModel)]="registerName" placeholder="Enter your name">
+
+        <label>Email</label>
+        <input type="email" [(ngModel)]="registerEmail" placeholder="Enter your email">
+
+        <label>Password</label>
+        <input type="password" [(ngModel)]="registerPassword" placeholder="Minimum 6 characters">
+
+        <button class="secondary-btn" (click)="register()">Register</button>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- HOME PAGE AFTER LOGIN -->
+  <main class="home-page" *ngIf="currentUser">
+
+    <section class="welcome-card">
+      <h2>Welcome back, {{ profile?.name }}</h2>
+      <p>Use the dashboard to access SafeRoute features and verify community reports.</p>
     </section>
 
-    <section class="card" *ngIf="currentUser && profile">
-      <h2>My Profile</h2>
+    <section class="quick-actions">
+      <a routerLink="/feature2" class="action-card">
+        <span>📝</span>
+        <h3>Submit Report</h3>
+        <p>Create a new safety report.</p>
+      </a>
 
-      <p><strong>Name:</strong> {{ profile.name }}</p>
-      <p><strong>Email:</strong> {{ profile.email }}</p>
-      <p><strong>Total Reports:</strong> {{ profile.reportCount }}</p>
-      <p><strong>Verified Reports:</strong> {{ profile.verifiedReportCount }}</p>
-      <p><strong>Upvotes Received:</strong> {{ profile.upvotesReceived }}</p>
-      <p><strong>Safety Contribution Score:</strong> {{ profile.safetyScore }}</p>
+      <a routerLink="/feature3" class="action-card">
+        <span>🗺️</span>
+        <h3>Heatmap</h3>
+        <p>View unsafe zones on the map.</p>
+      </a>
 
-      <button class="logout" (click)="logout()">Logout</button>
+      <a routerLink="/feature3" class="action-card">
+        <span>📍</span>
+        <h3>View Reports</h3>
+        <p>Browse reported hazards.</p>
+      </a>
+
+      <a routerLink="/feature5" class="action-card">
+        <span>🧭</span>
+        <h3>Safe Route</h3>
+        <p>Find a safer route.</p>
+      </a>
     </section>
 
-    <section class="card" *ngIf="currentUser">
-      <h2>Community Verification</h2>
+    <section class="dashboard-grid">
 
-      <p *ngIf="reports.length === 0">
+      <div class="dashboard-card" *ngIf="profile">
+        <h2>My Profile</h2>
+
+        <div class="profile-info">
+          <p><strong>Name:</strong> {{ profile.name }}</p>
+          <p><strong>Email:</strong> {{ profile.email }}</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat">
+            <h3>{{ profile.reportCount }}</h3>
+            <p>Total Reports</p>
+          </div>
+
+          <div class="stat">
+            <h3>{{ profile.verifiedReportCount }}</h3>
+            <p>Verified Reports</p>
+          </div>
+
+          <div class="stat">
+            <h3>{{ profile.upvotesReceived }}</h3>
+            <p>Upvotes Received</p>
+          </div>
+
+          <div class="stat score">
+            <h3>{{ profile.safetyScore }}</h3>
+            <p>Safety Score</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card leaderboard-card">
+        <h2>Leaderboard</h2>
+
+        <ol *ngIf="leaderboard.length > 0">
+          <li *ngFor="let user of leaderboard; let i = index">
+            <span class="rank">{{ i + 1 }}</span>
+            <span>{{ user.name }}</span>
+            <strong>{{ user.safetyScore }} pts</strong>
+          </li>
+        </ol>
+
+        <p *ngIf="leaderboard.length === 0">No users yet.</p>
+      </div>
+
+    </section>
+
+    <section class="dashboard-card community-card">
+      <div class="section-heading">
+        <h2>Community Verification</h2>
+        <p>Upvote accurate reports or dispute incorrect ones.</p>
+      </div>
+
+      <p class="empty-state" *ngIf="reports.length === 0">
         No reports found yet. Member 2 will add the report form later.
       </p>
 
-      <div class="report" *ngFor="let report of reports">
-        <h3>{{ report.category }}</h3>
+      <div class="report-list">
+        <div class="report-card" *ngFor="let report of reports">
 
-        <p><strong>Severity:</strong> {{ report.severity }}</p>
-        <p><strong>Description:</strong> {{ report.description }}</p>
-        <p><strong>Upvotes:</strong> {{ report.upvoteCount }}</p>
-        <p><strong>Disputes:</strong> {{ report.disputeCount }}</p>
+          <div class="report-header">
+            <div>
+              <h3>{{ report.category }}</h3>
+              <p>{{ report.description }}</p>
+            </div>
 
-        <p class="verified" *ngIf="report.verified">Verified ✅</p>
-        <p class="not-verified" *ngIf="!report.verified">Not Verified</p>
+            <span
+              class="badge"
+              [class.verified-badge]="report.verified"
+              [class.pending-badge]="!report.verified"
+            >
+              {{ report.verified ? 'Verified' : 'Pending' }}
+            </span>
+          </div>
 
-        <button (click)="upvote(report.id)">Upvote</button>
-        <button (click)="dispute(report.id)">Dispute</button>
+          <div class="report-details">
+            <span>Severity: <strong>{{ report.severity }}</strong></span>
+            <span>Upvotes: <strong>{{ report.upvoteCount }}</strong></span>
+            <span>Disputes: <strong>{{ report.disputeCount }}</strong></span>
+          </div>
+
+          <div class="report-actions">
+            <button class="small-btn" (click)="upvote(report.id)">Upvote</button>
+            <button class="small-btn outline-btn" (click)="dispute(report.id)">Dispute</button>
+          </div>
+
+        </div>
       </div>
     </section>
 
-    <section class="card" *ngIf="currentUser">
-      <h2>Leaderboard</h2>
-
-      <ol>
-        <li *ngFor="let user of leaderboard">
-          {{ user.name }} — {{ user.safetyScore }} points
-        </li>
-      </ol>
-    </section>
-  </div>
+  </main>
+</div>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommunityService } from '../../services/community.service';
 import { User } from 'firebase/auth';
@@ -8,14 +9,17 @@ import { User } from 'firebase/auth';
 @Component({
   selector: 'app-feature1',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './feature1.component.html',
   styleUrl: './feature1.component.css'
 })
 export class Feature1Component implements OnInit {
-  name = '';
-  email = '';
-  password = '';
+  registerName = '';
+  registerEmail = '';
+  registerPassword = '';
+
+  loginEmail = '';
+  loginPassword = '';
 
   currentUser: User | null = null;
   profile: any = null;
@@ -50,14 +54,19 @@ export class Feature1Component implements OnInit {
     try {
       this.clearMessages();
 
-      if (!this.name || !this.email || !this.password) {
-        this.errorMessage = 'Please enter name, email, and password.';
+      if (!this.registerName || !this.registerEmail || !this.registerPassword) {
+        this.errorMessage = 'Please enter name, email, and password to register.';
         return;
       }
 
-      await this.authService.register(this.name, this.email, this.password);
+      await this.authService.register(
+        this.registerName,
+        this.registerEmail,
+        this.registerPassword
+      );
+
       this.message = 'Registration successful.';
-      this.password = '';
+      this.registerPassword = '';
     } catch (error: any) {
       this.errorMessage = error.message;
     }
@@ -67,14 +76,14 @@ export class Feature1Component implements OnInit {
     try {
       this.clearMessages();
 
-      if (!this.email || !this.password) {
-        this.errorMessage = 'Please enter email and password.';
+      if (!this.loginEmail || !this.loginPassword) {
+        this.errorMessage = 'Please enter email and password to login.';
         return;
       }
 
-      await this.authService.login(this.email, this.password);
+      await this.authService.login(this.loginEmail, this.loginPassword);
       this.message = 'Login successful.';
-      this.password = '';
+      this.loginPassword = '';
     } catch (error: any) {
       this.errorMessage = error.message;
     }
