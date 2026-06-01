@@ -5,23 +5,18 @@
       <h1>SafeRoute</h1>
       <p>Community-powered urban safety reporting</p>
     </div>
-
-    <button *ngIf="currentUser" class="logout-btn" (click)="logout()">
-      Logout
-    </button>
   </header>
 
   <p class="success" *ngIf="message">{{ message }}</p>
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-  <!-- LOGIN / REGISTER FIRST PAGE -->
-  <main class="auth-page" *ngIf="!currentUser">
+  <main class="auth-page">
 
     <section class="hero">
       <h2>Stay aware. Report hazards. Travel safer.</h2>
       <p>
-        SafeRoute helps users report unsafe areas, verify community reports,
-        and access safer city navigation features.
+        Login or register to submit safety reports, verify community reports,
+        and access SafeRoute features.
       </p>
     </section>
 
@@ -32,178 +27,30 @@
         <p class="card-subtitle">Already have an account?</p>
 
         <label>Email</label>
-        <input
-          type="email"
-          [(ngModel)]="loginEmail"
-          placeholder="Enter your email"
-        >
+        <input type="email" [(ngModel)]="loginEmail" placeholder="Enter your email">
 
         <label>Password</label>
-        <input
-          type="password"
-          [(ngModel)]="loginPassword"
-          placeholder="Enter your password"
-        >
+        <input type="password" [(ngModel)]="loginPassword" placeholder="Enter your password">
 
         <button class="primary-btn" (click)="login()">Login</button>
       </div>
 
       <div class="auth-card">
         <h2>Register</h2>
-        <p class="card-subtitle">Create a new SafeRoute account.</p>
+        <p class="card-subtitle">Create a SafeRoute account.</p>
 
         <label>Name</label>
-        <input
-          type="text"
-          [(ngModel)]="registerName"
-          placeholder="Enter your name"
-        >
+        <input type="text" [(ngModel)]="registerName" placeholder="Enter your name">
 
         <label>Email</label>
-        <input
-          type="email"
-          [(ngModel)]="registerEmail"
-          placeholder="Enter your email"
-        >
+        <input type="email" [(ngModel)]="registerEmail" placeholder="Enter your email">
 
         <label>Password</label>
-        <input
-          type="password"
-          [(ngModel)]="registerPassword"
-          placeholder="Minimum 6 characters"
-        >
+        <input type="password" [(ngModel)]="registerPassword" placeholder="Minimum 6 characters">
 
         <button class="secondary-btn" (click)="register()">Register</button>
       </div>
 
     </section>
-  </main>
-
-  <!-- HOME DASHBOARD AFTER LOGIN -->
-  <main class="home-page" *ngIf="currentUser">
-
-    <section class="welcome-card">
-      <h2>Welcome back, {{ profile?.name }}</h2>
-      <p>Use the dashboard to access SafeRoute features and verify community reports.</p>
-    </section>
-
-    <section class="quick-actions">
-      <a routerLink="/crowdsource" class="action-card">
-        <span>📝</span>
-        <h3>Submit Report</h3>
-        <p>Create a new safety report.</p>
-      </a>
-
-      <a routerLink="/heatmap" class="action-card">
-        <span>🗺️</span>
-        <h3>Heatmap</h3>
-        <p>View unsafe zones on the map.</p>
-      </a>
-
-      <a routerLink="/viewreports" class="action-card">
-        <span>📍</span>
-        <h3>View Reports</h3>
-        <p>Browse reported hazards.</p>
-      </a>
-
-      <a routerLink="/heatmap" class="action-card">
-        <span>🧭</span>
-        <h3>Safe Route</h3>
-        <p>Route safety feature coming soon.</p>
-      </a>
-    </section>
-
-    <section class="dashboard-grid">
-
-      <div class="dashboard-card" *ngIf="profile">
-        <h2>My Profile</h2>
-
-        <div class="profile-info">
-          <p><strong>Name:</strong> {{ profile.name }}</p>
-          <p><strong>Email:</strong> {{ profile.email }}</p>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat">
-            <h3>{{ profile.reportCount }}</h3>
-            <p>Total Reports</p>
-          </div>
-
-          <div class="stat">
-            <h3>{{ profile.verifiedReportCount }}</h3>
-            <p>Verified Reports</p>
-          </div>
-
-          <div class="stat">
-            <h3>{{ profile.upvotesReceived }}</h3>
-            <p>Upvotes Received</p>
-          </div>
-
-          <div class="stat score">
-            <h3>{{ profile.safetyScore }}</h3>
-            <p>Safety Score</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="dashboard-card leaderboard-card">
-        <h2>Leaderboard</h2>
-
-        <ol *ngIf="leaderboard.length > 0">
-          <li *ngFor="let user of leaderboard; let i = index">
-            <span class="rank">{{ i + 1 }}</span>
-            <span>{{ user.name }}</span>
-            <strong>{{ user.safetyScore }} pts</strong>
-          </li>
-        </ol>
-
-        <p *ngIf="leaderboard.length === 0">No users yet.</p>
-      </div>
-
-    </section>
-
-    <section class="dashboard-card community-card">
-      <div class="section-heading">
-        <h2>Community Verification</h2>
-        <p>Upvote accurate reports or dispute incorrect ones.</p>
-      </div>
-
-      <p class="empty-state" *ngIf="reports.length === 0">
-        No reports found yet. Submitted reports will appear here for community verification.
-      </p>
-
-      <div class="report-list">
-        <div class="report-card" *ngFor="let report of reports">
-
-          <div class="report-header">
-            <div>
-              <h3>{{ report.category }}</h3>
-              <p>{{ report.description }}</p>
-            </div>
-
-            <span
-              class="badge"
-              [class.verified-badge]="report.verified"
-              [class.pending-badge]="!report.verified"
-            >
-              {{ report.verified ? 'Verified' : 'Pending' }}
-            </span>
-          </div>
-
-          <div class="report-details">
-            <span>Severity: <strong>{{ report.severity }}</strong></span>
-            <span>Upvotes: <strong>{{ report.upvoteCount }}</strong></span>
-            <span>Disputes: <strong>{{ report.disputeCount }}</strong></span>
-          </div>
-
-          <div class="report-actions">
-            <button class="small-btn" (click)="upvote(report.id)">Upvote</button>
-            <button class="small-btn outline-btn" (click)="dispute(report.id)">Dispute</button>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
   </main>
 </div>

@@ -1,15 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { CommunityService } from '../../services/community.service';
-import { User } from 'firebase/auth';
 
 @Component({
   selector: 'app-feature1',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './feature1.component.html',
   styleUrl: './feature1.component.css'
 })
@@ -21,31 +19,18 @@ export class Feature1Component implements OnInit {
   loginEmail = '';
   loginPassword = '';
 
-  currentUser: User | null = null;
-  profile: any = null;
-  reports: any[] = [];
-  leaderboard: any[] = [];
-
   message = '';
   errorMessage = '';
 
   constructor(
     private authService: AuthService,
-    private communityService: CommunityService
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.authService.listenToAuthChanges(async (user) => {
-      this.currentUser = user;
-
       if (user) {
-        await this.loadProfile();
-        await this.loadReports();
-        await this.loadLeaderboard();
-      } else {
-        this.profile = null;
-        this.reports = [];
-        this.leaderboard = [];
+        await this.router.navigate(['/home']);
       }
     });
   }
@@ -67,6 +52,8 @@ export class Feature1Component implements OnInit {
 
       this.message = 'Registration successful.';
       this.registerPassword = '';
+
+      await this.router.navigate(['/home']);
     } catch (error: any) {
       this.errorMessage = error.message;
     }
@@ -82,54 +69,11 @@ export class Feature1Component implements OnInit {
       }
 
       await this.authService.login(this.loginEmail, this.loginPassword);
+
       this.message = 'Login successful.';
       this.loginPassword = '';
-    } catch (error: any) {
-      this.errorMessage = error.message;
-    }
-  }
 
-  async logout(): Promise<void> {
-    try {
-      this.clearMessages();
-      await this.authService.logout();
-      this.message = 'Logged out successfully.';
-    } catch (error: any) {
-      this.errorMessage = error.message;
-    }
-  }
-
-  async loadProfile(): Promise<void> {
-    this.profile = await this.authService.getCurrentUserProfile();
-  }
-
-  async loadReports(): Promise<void> {
-    this.reports = await this.communityService.getReports();
-  }
-
-  async loadLeaderboard(): Promise<void> {
-    this.leaderboard = await this.communityService.getLeaderboard();
-  }
-
-  async upvote(reportId: string): Promise<void> {
-    try {
-      this.clearMessages();
-      await this.communityService.upvoteReport(reportId);
-      this.message = 'Report upvoted.';
-      await this.loadReports();
-      await this.loadLeaderboard();
-      await this.loadProfile();
-    } catch (error: any) {
-      this.errorMessage = error.message;
-    }
-  }
-
-  async dispute(reportId: string): Promise<void> {
-    try {
-      this.clearMessages();
-      await this.communityService.disputeReport(reportId);
-      this.message = 'Report disputed.';
-      await this.loadReports();
+      await this.router.navigate(['/home']);
     } catch (error: any) {
       this.errorMessage = error.message;
     }
