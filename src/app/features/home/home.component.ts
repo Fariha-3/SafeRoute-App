@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { MContainerComponent } from '../../m-framework/components/m-container/m-container.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MContainerComponent } from '../../m-framework/components/m-container/m-container.component';
 import { AuthService } from '../../services/auth.service';
 import { CommunityService } from '../../services/community.service';
 import { User } from 'firebase/auth';
