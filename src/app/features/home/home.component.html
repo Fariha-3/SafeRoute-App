@@ -11,12 +11,6 @@
     <p>Browse submitted reports.</p>
   </a>
 
-  <a routerLink="/heatmap" class="action-card">
-    <span>🗺️</span>
-    <h3>Heatmap</h3>
-    <p>View unsafe zones on the map.</p>
-  </a>
-
   <a routerLink="/map" class="action-card">
     <span>🧭</span>
     <h3>Safe Route</h3>
@@ -28,7 +22,6 @@
 <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
 <section class="dashboard-grid">
-
   <div class="dashboard-card" *ngIf="profile">
     <h2>My Profile</h2>
 
@@ -75,7 +68,6 @@
 
     <p *ngIf="leaderboard.length === 0">No users yet.</p>
   </div>
-
 </section>
 
 <section class="dashboard-card community-card">
@@ -90,7 +82,6 @@
 
   <div class="report-list">
     <div class="report-card" *ngFor="let report of reports">
-
       <div class="report-header">
         <div>
           <h3>{{ report.category }}</h3>
@@ -116,7 +107,6 @@
         <button class="small-btn" (click)="upvote(report.id)">Upvote</button>
         <button class="small-btn outline-btn" (click)="dispute(report.id)">Dispute</button>
       </div>
-
     </div>
   </div>
 </section>

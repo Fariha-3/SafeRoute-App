@@ -60,7 +60,16 @@ export class HomeComponent implements OnInit {
   }
 
   async loadProfile(): Promise<void> {
-    this.profile = await this.authService.getCurrentUserProfile();
+    const userProfile = await this.authService.getCurrentUserProfile();
+
+    if (this.currentUser && userProfile) {
+      const calculatedStats = await this.communityService.calculateUserStats(this.currentUser.uid);
+
+      this.profile = {
+        ...userProfile,
+        ...calculatedStats
+      };
+    }
   }
 
   async loadReports(): Promise<void> {
@@ -68,7 +77,7 @@ export class HomeComponent implements OnInit {
   }
 
   async loadLeaderboard(): Promise<void> {
-    this.leaderboard = await this.communityService.getLeaderboard();
+    this.leaderboard = await this.communityService.getCalculatedLeaderboard();
   }
 
   async upvote(reportId: string): Promise<void> {
@@ -94,6 +103,8 @@ export class HomeComponent implements OnInit {
 
       this.message = 'Report disputed.';
       await this.loadReports();
+      await this.loadLeaderboard();
+      await this.loadProfile();
     } catch (error: any) {
       this.errorMessage = error.message;
     }
