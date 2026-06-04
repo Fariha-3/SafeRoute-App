@@ -1,0 +1,199 @@
+<m-container>
+  <div class="map-page">
+    <!-- Back button -->
+   <div class="top-bar">
+  <button type="button" class="back-btn" (click)="goBack()">
+    <span class="back-icon">←</span>
+    <span>Back</span>
+  </button>
+
+  <div class="page-title">
+    <h2>Safety Heatmap</h2>
+    <p>View nearby safety reports</p>
+  </div>
+</div>
+
+    <!-- Filters -->
+    <div class="filter-card">
+
+  <div class="filter-header">
+    <div>
+      <h3>Filter Reports</h3>
+      <p>Search safety reports by category, severity, and time</p>
+    </div>
+
+    <button type="button" class="hide-filter-btn" (click)="toggleFilter()">
+      {{ filterHidden ? '⌄' : '^' }}
+    </button>
+  </div>
+
+  <div class="filter-content" *ngIf="!filterHidden">
+
+    <div class="filter-grid">
+
+      <div class="filter-field">
+        <label>Category</label>
+        <select [(ngModel)]="selectedCategory">
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Severity</label>
+        <select [(ngModel)]="selectedSeverity">
+          <option *ngFor="let severity of severities" [value]="severity">
+            {{ severity }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Time Range</label>
+        <select [(ngModel)]="selectedTimeRange">
+          <option *ngFor="let timeRange of timeRanges" [value]="timeRange">
+            {{ timeRange }}
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" class="load-reports-btn" (click)="applyFilters()">
+        Load Reports
+      </button>
+
+      <span class="report-pill">
+        {{ filteredReports.length }} filtered report(s)
+      </span>
+    </div>
+
+  </div>
+
+</div>
+
+    <!-- Google Map -->
+    <div id="map"></div>
+
+    <!-- Box shown when Load Reports is clicked -->
+<div class="filtered-panel" *ngIf="showFilteredReportsBox">
+
+  <div class="filtered-panel-header">
+    <div>
+      <h3>Filtered Reports</h3>
+      <p>{{ filteredReports.length }} report(s) match your selected filters</p>
+    </div>
+
+    <button type="button" class="close-panel-btn" (click)="closeFilteredReportsBox()">
+      ×
+    </button>
+  </div>
+
+  <div class="empty-state" *ngIf="filteredReports.length === 0">
+    <div class="empty-icon">🔍</div>
+    <h4>No reports found</h4>
+    <p>Try changing the category, severity, or time range.</p>
+  </div>
+
+  <div class="filtered-report-list" *ngIf="filteredReports.length > 0">
+    <div class="modern-report-card" *ngFor="let report of filteredReports">
+
+      <div class="report-card-top">
+        <div>
+          <h4>{{ report.category }}</h4>
+          <p class="report-time">{{ report.timestamp | date:'medium' }}</p>
+        </div>
+
+        <span
+          class="severity-badge"
+          [class.high-badge]="report.severity === 'High'"
+          [class.medium-badge]="report.severity === 'Medium'"
+          [class.low-badge]="report.severity === 'Low'">
+          {{ report.severity }}
+        </span>
+      </div>
+
+      <p class="report-description">
+        {{ report.description }}
+      </p>
+
+      <div class="report-meta">
+        <span>Lat: {{ report.latitude | number:'1.4-4' }}</span>
+        <span>Lng: {{ report.longitude | number:'1.4-4' }}</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+    <!-- Box shown when heat zone is clicked -->
+    <!-- Box shown when a heat zone is clicked -->
+<div class="area-panel" *ngIf="showReportBox">
+
+  <div class="area-panel-header">
+    <div class="area-title-group">
+      <div class="area-icon">📍</div>
+
+      <div>
+        <h3>Reports in this Area</h3>
+        <p>{{ selectedAreaReports.length }} nearby report(s) found in this heat zone</p>
+      </div>
+    </div>
+
+    <button type="button" class="close-area-btn" (click)="closeReportBox()">
+      ×
+    </button>
+  </div>
+
+  <div class="area-empty-state" *ngIf="selectedAreaReports.length === 0">
+    <div class="area-empty-icon">🛡️</div>
+    <h4>No nearby reports</h4>
+    <p>This zone currently has no matching individual reports.</p>
+  </div>
+
+  <div class="area-report-list" *ngIf="selectedAreaReports.length > 0">
+
+    <div class="area-report-card" *ngFor="let report of selectedAreaReports">
+
+      <div class="area-card-top">
+        <div>
+          <h4>{{ report.category }}</h4>
+          <p class="area-report-time">{{ report.timestamp | date:'medium' }}</p>
+        </div>
+
+        <span
+          class="area-severity-badge"
+          [class.area-high]="report.severity === 'High'"
+          [class.area-medium]="report.severity === 'Medium'"
+          [class.area-low]="report.severity === 'Low'">
+          {{ report.severity }}
+        </span>
+      </div>
+
+      <p class="area-description">
+        {{ report.description }}
+      </p>
+
+      <div class="area-info-row">
+        <div class="area-info-chip">
+          <span class="chip-label">Latitude</span>
+          <span>{{ report.latitude | number:'1.4-4' }}</span>
+        </div>
+
+        <div class="area-info-chip">
+          <span class="chip-label">Longitude</span>
+          <span>{{ report.longitude | number:'1.4-4' }}</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+  </div>
+
+</m-container>

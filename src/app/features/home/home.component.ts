@@ -12,8 +12,13 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './home.component.css',
 })
 export class HomeComponent {
-
-  constructor(private router: Router) {}
+  
+  constructor(private router:Router) 
+  {    
+  }
+  navigateToMap() {
+    this.router.navigate(['/map']);
+  }
 
   addReport() {
     this.router.navigate(['/crowdsource']);
@@ -27,4 +32,8 @@ export class HomeComponent {
     this.router.navigate(['/heatmap']);
   }
 
+  navigateToGemini() {
+    this.router.navigate(['/report']);
+
+  }
 }

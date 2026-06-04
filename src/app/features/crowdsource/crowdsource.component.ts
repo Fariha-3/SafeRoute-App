@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../m-framework/services/firebase.service';
 import { MContainerComponent } from '../../m-framework/components/m-container/m-container.component';
+import { GeminiService } from '../../m-framework/services/gemini.service'; 
 
 @Component({
   selector: 'app-crowdsource',
@@ -26,9 +27,15 @@ export class CrowdsourceComponent {
   message = '';
   error = '';
 
+  // ✅ ADDED Gemini output fields
+  hazardType = '';
+  authority = '';
+  recommendedAction = '';
+
   constructor(
     private router: Router,
-    private firebase: FirebaseService
+    private firebase: FirebaseService,
+    private geminiService: GeminiService // ✅ ADDED
   ) {}
 
   addReport() {
@@ -46,25 +53,49 @@ export class CrowdsourceComponent {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
 
         this.report.latitude = position.coords.latitude;
         this.report.longitude = position.coords.longitude;
         this.report.timestamp = new Date().toISOString();
 
-        // Save to Firebase Realtime Database
-        console.log('Saving report:', this.report);
-        const key = this.firebase.pushToList('reports', this.report);
-        console.log('Firebase key:', key);
-        // Reset form
-        this.report = {
-          category: '',
-          severity: '',
-          description: '',
-          latitude: 0,
-          longitude: 0,
-          timestamp: ''
-        };
+        try {
+
+          // ✅ ADDED GEMINI CALL (no logic removed)
+          const geminiResult = await this.geminiService.analyzeReport(
+            this.report.category,
+            this.report.description
+          );
+
+          this.hazardType = geminiResult.hazardType;
+          this.authority = geminiResult.authority;
+          this.recommendedAction = geminiResult.recommendedAction;
+
+          // ORIGINAL LOGIC KEPT, ONLY EXTENDED
+          const key = this.firebase.pushToList('reports', {
+            ...this.report,
+            hazardType: this.hazardType,
+            authority: this.authority,
+            recommendedAction: this.recommendedAction
+          });
+
+          console.log('Firebase key:', key);
+
+          // Reset form
+          this.report = {
+            category: '',
+            severity: '',
+            description: '',
+            latitude: 0,
+            longitude: 0,
+            timestamp: ''
+          };
+
+        } catch (error) {
+          console.error(error);
+          this.error = 'Gemini analysis failed or Firebase error';
+        }
+
       },
       (error) => {
         console.error(error);

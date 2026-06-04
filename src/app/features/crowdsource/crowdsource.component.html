@@ -1,38 +1,48 @@
 <m-container>
 
-  <h2>Submit Safety Report</h2>
+  <div class="page-card">
 
-  <div *ngIf="error" class="error">{{ error }}</div>
-  <div *ngIf="message" class="success">{{ message }}</div>
+    <h2>Submit Safety Report</h2>
 
-  <label>Category</label>
-  <select [(ngModel)]="report.category">
-    <option value="">Select</option>
-    <option>Poorly Lit Street</option>
-    <option>Damaged Infrastructure</option>
-    <option>Security Concern</option>
-    <option>Environmental Hazard</option>
-  </select>
+    <div *ngIf="error" class="error">{{ error }}</div>
+    <div *ngIf="message" class="success">{{ message }}</div>
 
-  <br><br>
+    <label>Category</label>
+    <select [(ngModel)]="report.category">
+      <option value="">Select</option>
+      <option>Poorly Lit Street</option>
+      <option>Damaged Infrastructure</option>
+      <option>Security Concern</option>
+      <option>Environmental Hazard</option>
+    </select>
 
-  <label>Severity</label>
-  <select [(ngModel)]="report.severity">
-    <option value="">Select</option>
-    <option>Low</option>
-    <option>Medium</option>
-    <option>High</option>
-  </select>
+    <label>Severity</label>
+    <select [(ngModel)]="report.severity">
+      <option value="">Select</option>
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
 
-  <br><br>
+    <label>Description</label>
+    <textarea [(ngModel)]="report.description"></textarea>
 
-  <label>Description</label>
-  <textarea [(ngModel)]="report.description"></textarea>
+    <!-- BUTTONS -->
+    <div class="button-group">
+      <button (click)="addReport()">Submit</button>
+      <button (click)="back()">Back</button>
+    </div>
 
-  <br><br>
+    <!-- GEMINI -->
+    <div *ngIf="hazardType" class="gemini-box">
+      <h3>AI Analysis (Gemini)</h3>
 
-  <button (click)="addReport()">Submit</button>
-  <button (click)="back()">Back</button>
+      <p><b>Hazard Type:</b> {{ hazardType }}</p>
+      <p><b>Authority:</b> {{ authority }}</p>
+      <p><b>Recommended Action:</b> {{ recommendedAction }}</p>
+    </div>
+
+  </div>
 
 </m-container>
 
