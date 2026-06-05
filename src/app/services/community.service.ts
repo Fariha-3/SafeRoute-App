@@ -6,10 +6,9 @@ import { auth, db } from '../firebase.config';
   providedIn: 'root'
 })
 export class CommunityService {
-  private reportsPath = 'reports';
 
   async getReports(): Promise<any[]> {
-    const snapshot = await get(ref(db, this.reportsPath));
+    const snapshot = await get(ref(db, 'reports'));
 
     if (!snapshot.exists()) {
       return [];
@@ -21,14 +20,8 @@ export class CommunityService {
       const report = reportsData[id];
 
       return {
-        id,
+        id: id,
         ...report,
-        userId: report.userId || report.uid || report.createdBy || report.ownerId,
-        category: report.category || report.hazardType || 'Uncategorized',
-        severity: report.severity || 'Not specified',
-        description: report.description || report.details || report.reportDescription || 'No description',
-        timestamp: report.timestamp || report.createdAt || 0,
-        verified: report.verified || false,
         upvoteCount: report.upvotes ? Object.keys(report.upvotes).length : 0,
         disputeCount: report.disputes ? Object.keys(report.disputes).length : 0
       };
@@ -42,7 +35,7 @@ export class CommunityService {
       throw new Error('You must login first.');
     }
 
-    const reportRef = ref(db, `${this.reportsPath}/${reportId}`);
+    const reportRef = ref(db, `reports/${reportId}`);
     const snapshot = await get(reportRef);
 
     if (!snapshot.exists()) {
@@ -50,13 +43,8 @@ export class CommunityService {
     }
 
     const report = snapshot.val();
-    const reportOwnerId = report.userId || report.uid || report.createdBy || report.ownerId;
 
-    if (!reportOwnerId) {
-      throw new Error('This report does not have an owner user ID.');
-    }
-
-    if (reportOwnerId === currentUser.uid) {
+    if (report.userId === currentUser.uid) {
       throw new Error('You cannot upvote your own report.');
     }
 
@@ -71,6 +59,11 @@ export class CommunityService {
       [`disputes/${currentUser.uid}`]: null
     });
 
+    await this.increaseUserValue(report.userId, 'upvotesReceived', 1);
+
+    // Each upvote now gives 2 safety score points
+    await this.increaseUserValue(report.userId, 'safetyScore', 2);
+
     const newUpvoteCount = Object.keys({
       ...upvotes,
       [currentUser.uid]: true
@@ -80,6 +73,9 @@ export class CommunityService {
       await update(reportRef, {
         verified: true
       });
+
+      await this.increaseUserValue(report.userId, 'verifiedReportCount', 1);
+      await this.increaseUserValue(report.userId, 'safetyScore', 25);
     }
   }
 
@@ -90,7 +86,7 @@ export class CommunityService {
       throw new Error('You must login first.');
     }
 
-    const reportRef = ref(db, `${this.reportsPath}/${reportId}`);
+    const reportRef = ref(db, `reports/${reportId}`);
     const snapshot = await get(reportRef);
 
     if (!snapshot.exists()) {
@@ -98,9 +94,8 @@ export class CommunityService {
     }
 
     const report = snapshot.val();
-    const reportOwnerId = report.userId || report.uid || report.createdBy || report.ownerId;
 
-    if (reportOwnerId === currentUser.uid) {
+    if (report.userId === currentUser.uid) {
       throw new Error('You cannot dispute your own report.');
     }
 
@@ -116,100 +111,26 @@ export class CommunityService {
     });
   }
 
-  async calculateUserStats(uid: string): Promise<any> {
-    const snapshot = await get(ref(db, this.reportsPath));
+  async getLeaderboard(): Promise<any[]> {
+    const snapshot = await get(ref(db, 'users'));
 
-    let reportCount = 0;
-    let verifiedReportCount = 0;
-    let upvotesReceived = 0;
-
-    if (snapshot.exists()) {
-      const reportsData = snapshot.val();
-
-      Object.keys(reportsData).forEach((reportId) => {
-        const report = reportsData[reportId];
-        const ownerId = report.userId || report.uid || report.createdBy || report.ownerId;
-
-        if (ownerId === uid) {
-          reportCount++;
-
-          if (report.verified) {
-            verifiedReportCount++;
-          }
-
-          if (report.upvotes) {
-            upvotesReceived += Object.keys(report.upvotes).length;
-          }
-        }
-      });
-    }
-
-    const safetyScore =
-      reportCount * 10 +
-      upvotesReceived * 5 +
-      verifiedReportCount * 25;
-
-    return {
-      reportCount,
-      verifiedReportCount,
-      upvotesReceived,
-      safetyScore
-    };
-  }
-
-  async getCalculatedLeaderboard(): Promise<any[]> {
-    const usersSnapshot = await get(ref(db, 'users'));
-    const reportsSnapshot = await get(ref(db, this.reportsPath));
-
-    if (!usersSnapshot.exists()) {
+    if (!snapshot.exists()) {
       return [];
     }
 
-    const usersData = usersSnapshot.val();
-    const reportsData = reportsSnapshot.exists() ? reportsSnapshot.val() : {};
+    const usersData = snapshot.val();
 
-    const leaderboard = Object.keys(usersData).map((uid) => {
-      let reportCount = 0;
-      let verifiedReportCount = 0;
-      let upvotesReceived = 0;
-
-      Object.keys(reportsData).forEach((reportId) => {
-        const report = reportsData[reportId];
-        const ownerId = report.userId || report.uid || report.createdBy || report.ownerId;
-
-        if (ownerId === uid) {
-          reportCount++;
-
-          if (report.verified) {
-            verifiedReportCount++;
-          }
-
-          if (report.upvotes) {
-            upvotesReceived += Object.keys(report.upvotes).length;
-          }
-        }
-      });
-
-      const safetyScore =
-        reportCount * 10 +
-        upvotesReceived * 5 +
-        verifiedReportCount * 25;
-
+    return Object.keys(usersData).map((uid) => {
       return {
-        uid,
-        ...usersData[uid],
-        reportCount,
-        verifiedReportCount,
-        upvotesReceived,
-        safetyScore
+        uid: uid,
+        ...usersData[uid]
       };
-    });
-
-    return leaderboard.sort((a, b) => b.safetyScore - a.safetyScore);
+    }).sort((a, b) => (b.safetyScore || 0) - (a.safetyScore || 0));
   }
 
-  async getLeaderboard(): Promise<any[]> {
-    return this.getCalculatedLeaderboard();
+  async increaseReportCountForUser(uid: string): Promise<void> {
+    await this.increaseUserValue(uid, 'reportCount', 1);
+    await this.increaseUserValue(uid, 'safetyScore', 10);
   }
 
   private async increaseUserValue(uid: string, field: string, amount: number): Promise<void> {

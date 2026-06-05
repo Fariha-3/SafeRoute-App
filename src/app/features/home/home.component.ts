@@ -43,6 +43,14 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  get totalReports(): number {
+    return this.reports.length;
+  }
+
+  get verifiedReports(): number {
+    return this.reports.filter((report) => report.verified).length;
+  }
+
   navigateToMap(): void {
     this.router.navigate(['/map']);
   }
@@ -55,21 +63,8 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/viewreports']);
   }
 
-  viewHeatmap(): void {
-    this.router.navigate(['/heatmap']);
-  }
-
   async loadProfile(): Promise<void> {
-    const userProfile = await this.authService.getCurrentUserProfile();
-
-    if (this.currentUser && userProfile) {
-      const calculatedStats = await this.communityService.calculateUserStats(this.currentUser.uid);
-
-      this.profile = {
-        ...userProfile,
-        ...calculatedStats
-      };
-    }
+    this.profile = await this.authService.getCurrentUserProfile();
   }
 
   async loadReports(): Promise<void> {
@@ -77,7 +72,7 @@ export class HomeComponent implements OnInit {
   }
 
   async loadLeaderboard(): Promise<void> {
-    this.leaderboard = await this.communityService.getCalculatedLeaderboard();
+    this.leaderboard = await this.communityService.getLeaderboard();
   }
 
   async upvote(reportId: string): Promise<void> {
@@ -103,8 +98,6 @@ export class HomeComponent implements OnInit {
 
       this.message = 'Report disputed.';
       await this.loadReports();
-      await this.loadLeaderboard();
-      await this.loadProfile();
     } catch (error: any) {
       this.errorMessage = error.message;
     }
