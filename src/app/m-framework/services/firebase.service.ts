@@ -37,7 +37,6 @@ export class FirebaseService {
       appId: "1:305708394031:web:938ca986151b4d117948da"
     };
 
-    // Prevent duplicate initialization
     if (!getApps().length) {
       initializeApp(firebaseConfig);
     }
@@ -60,7 +59,6 @@ export class FirebaseService {
     return remove(ref(this.db, `${path}/${key}`));
   }
 
-  // ---------------- LISTS ----------------
 
   pushToList(path: string, data: any) {
     return push(ref(this.db, path), data).key;

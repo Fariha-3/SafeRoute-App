@@ -27,7 +27,6 @@ export class CrowdsourceComponent {
   message = '';
   error = '';
 
-  // ✅ ADDED Gemini output fields
   hazardType = '';
   authority = '';
   recommendedAction = '';
@@ -35,7 +34,7 @@ export class CrowdsourceComponent {
   constructor(
     private router: Router,
     private firebase: FirebaseService,
-    private geminiService: GeminiService // ✅ ADDED
+    private geminiService: GeminiService 
   ) {}
 
   addReport() {
@@ -61,7 +60,7 @@ export class CrowdsourceComponent {
 
         try {
 
-          // ✅ ADDED GEMINI CALL (no logic removed)
+          
           const geminiResult = await this.geminiService.analyzeReport(
             this.report.category,
             this.report.description
@@ -71,7 +70,7 @@ export class CrowdsourceComponent {
           this.authority = geminiResult.authority;
           this.recommendedAction = geminiResult.recommendedAction;
 
-          // ORIGINAL LOGIC KEPT, ONLY EXTENDED
+          
           const key = this.firebase.pushToList('reports', {
             ...this.report,
             hazardType: this.hazardType,

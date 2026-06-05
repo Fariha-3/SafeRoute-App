@@ -1,12 +1,13 @@
 <h2>All Safety Reports</h2>
-
+<button (click)="back()">Back</button>
 <div *ngFor="let r of reports" class="report-card">
 
   <h3>{{ r.category }}</h3>
   <p><b>Severity:</b> {{ r.severity }}</p>
   <p>{{ r.description }}</p>
   <small>{{ r.timestamp }}</small>
-
+  <button class="remove-btn" (click)="removeReport(r)">
+    Remove
+  </button>
 </div>
 
-<button (click)="back()">Back</button>

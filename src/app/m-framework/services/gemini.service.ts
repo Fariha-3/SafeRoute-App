@@ -8,7 +8,7 @@ import {
 
 export const environment = {
   production: false,
-  geminiApiKey: 'AIzaSyBqpCAcDFpgr_qg-weIA0-lQDNqGaRsTgk'
+  geminiApiKey: 'AIzaSyDGO2Y2vF1VQmt8WPJYPZj80gJ9olWZgF8'
 };
 
 @Injectable({
@@ -24,7 +24,7 @@ export class GeminiService {
     this.genAI = new GoogleGenerativeAI(this.apiKey);
   }
 
-  // ✅ ADD THIS METHOD (THIS IS WHAT YOU WERE MISSING)
+  
   async analyzeReport(category: string, description: string): Promise<any> {
 
     const model = this.genAI.getGenerativeModel({
