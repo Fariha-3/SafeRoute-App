@@ -164,15 +164,16 @@ loadReportsFromFirebase() {
       report.severity
     );
 
-    // Heatmap should show from the beginning
+    // When map first opens, show all reports on heatmap
     this.reports = this.allReports;
 
+    // Draw full heatmap initially
     this.displayReportHeatmap();
   });
 }
 
 applyFilters() {
-  console.log('Load Reports clicked');
+  console.log('Apply filters clicked');
 
   this.filteredReports = this.allReports.filter(report => {
     const categoryMatch =
@@ -188,7 +189,19 @@ applyFilters() {
     return categoryMatch && severityMatch && timeMatch;
   });
 
+  // IMPORTANT:
+  // Update the heatmap data also
+  this.reports = this.filteredReports;
+
+  // Redraw heatmap with only filtered reports
+  this.displayReportHeatmap();
+
+  // Show written filtered reports panel too
   this.showFilteredReportsBox = true;
+
+  // Close area report box if it was open
+  this.showReportBox = false;
+  this.selectedAreaReports = [];
 
   console.log('Filtered reports:', this.filteredReports);
 }
@@ -397,7 +410,7 @@ checkRouteSafety(routeResult: any, routeIndex: number = 0)  {
       longitude: report.longitude
     });
 
-    return isHighSeverity && nearRoute;
+    return isHighSeverity && this.isActiveReport(report) && nearRoute;
   });
 
   this.highlightUnsafeRouteZones();
@@ -415,6 +428,23 @@ checkRouteSafety(routeResult: any, routeIndex: number = 0)  {
   this.generateRouteAdvisory();
 
   console.log('Unsafe reports near route:', this.unsafeRouteReports);
+}
+
+isActiveReport(report: SafetyReport): boolean {
+  if (!report.timestamp) {
+    return false;
+  }
+
+  const reportTime = new Date(report.timestamp).getTime();
+
+  if (isNaN(reportTime)) {
+    return false;
+  }
+
+  const now = Date.now();
+  const lastWeek = 7 * 24 * 60 * 60 * 1000;
+
+  return now - reportTime <= lastWeek;
 }
 
 getDetailedRoutePath(routeResult: any, routeIndex: number = 0): any[] {
