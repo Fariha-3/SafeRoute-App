@@ -28,6 +28,9 @@ export class ViewReportsComponent implements OnInit {
     });
 
   }
+  removeReport(report: any) {
+    this.firebase.deleteFromList('reports', report.id);
+  }
 
   back(): void {
     this.router.navigate(['/']);

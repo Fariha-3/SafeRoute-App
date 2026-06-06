@@ -28,22 +28,20 @@ export class FirebaseService {
   setupFirebase() {
 
     const firebaseConfig = {
-      apiKey: "AIzaSyBRQfpDaYHE13csiKUXxTYoqWl5uRLIFZQ",
-      authDomain: "saferouteapp-59c78.firebaseapp.com",
-      databaseURL: "https://saferouteapp-59c78-default-rtdb.firebaseio.com",
-      projectId: "saferouteapp-59c78",
-      storageBucket: "saferouteapp-59c78.firebasestorage.app",
-      messagingSenderId: "790596163257",
-      appId: "1:790596163257:web:7f67374852516d58706d68"
+      apiKey: "AIzaSyA7va9BnXu_S7D_cWbscTDmgI0_f32A9Xg",
+      authDomain: "saferoute-b6da1.firebaseapp.com",
+      databaseURL: "https://saferoute-b6da1-default-rtdb.firebaseio.com/",
+      projectId: "saferoute-b6da1",
+      storageBucket: "saferoute-b6da1.firebasestorage.app",
+      messagingSenderId: "305708394031",
+      appId: "1:305708394031:web:938ca986151b4d117948da"
     };
 
-    // Prevent duplicate initialization
     if (!getApps().length) {
       initializeApp(firebaseConfig);
     }
   }
 
-  // ---------------- CRUD ----------------
 
   create(path: string, data: any): Promise<void> {
     return set(ref(this.db, path), data);
@@ -61,7 +59,6 @@ export class FirebaseService {
     return remove(ref(this.db, `${path}/${key}`));
   }
 
-  // ---------------- LISTS ----------------
 
   pushToList(path: string, data: any) {
     return push(ref(this.db, path), data).key;
@@ -87,7 +84,6 @@ export class FirebaseService {
     return list;
   }
 
-  // ---------------- REALTIME LISTENER ----------------
 
   listenToList(path: string, callback: (data: any[]) => void) {
 
@@ -106,7 +102,6 @@ export class FirebaseService {
     });
   }
 
-  // ---------------- HELPERS ----------------
 
   reset(path: string) {
     return remove(ref(this.db, path));

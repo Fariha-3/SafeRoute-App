@@ -1,0 +1,99 @@
+/* CENTER PAGE */
+m-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px 15px;
+  box-sizing: border-box;
+  background: #f4f6f9;
+  overflow-x: hidden;
+}
+
+/* MAIN CARD */
+.page-card {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* TITLE */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* LABELS */
+label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+/* INPUTS */
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* BUTTON ROW FIX */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* SUBMIT */
+.button-group button:first-child {
+  background: #2ecc71;
+  color: white;
+}
+
+/* BACK */
+.button-group button:last-child {
+  background: #e74c3c;
+  color: white;
+}
+
+/* GEMINI CARD */
+.gemini-box {
+  margin-top: 20px;
+  padding: 15px;
+  background: #eef6ff;
+  border-radius: 10px;
+  border: 1px solid #cfe3ff;
+}
+
+/* ERROR */
+.error {
+  background: #ffe5e5;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+/* SUCCESS */
+.success {
+  background: #e7fff0;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}

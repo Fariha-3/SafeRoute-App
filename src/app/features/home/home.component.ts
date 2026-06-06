@@ -32,4 +32,8 @@ export class HomeComponent {
     this.router.navigate(['/heatmap']);
   }
 
+  navigateToGemini() {
+    this.router.navigate(['/report']);
+
+  }
 }
