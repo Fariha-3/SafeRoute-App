@@ -42,4 +42,5 @@ testem.log
 Thumbs.db
 
 src/app/secrets.ts
+#gemini api
 src/app/config/api-keys.ts
