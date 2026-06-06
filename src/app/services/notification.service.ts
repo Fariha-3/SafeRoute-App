@@ -23,7 +23,10 @@ export class NotificationService {
     }
 
     if (Notification.permission === 'granted') {
-      new Notification(title, { body });
+      new Notification(title, {
+        body,
+        icon: 'assets/favicon.ico'
+      });
     }
   }
 
