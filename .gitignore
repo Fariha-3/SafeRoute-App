@@ -42,3 +42,4 @@ testem.log
 Thumbs.db
 
 src/app/secrets.ts
+src/app/config/api-keys.ts
