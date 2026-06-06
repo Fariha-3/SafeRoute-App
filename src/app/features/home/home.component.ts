@@ -117,8 +117,9 @@ export class HomeComponent implements OnInit {
   clearMessages(): void {
     this.message = '';
     this.errorMessage = '';
+  }
+  
   navigateToGemini() {
     this.router.navigate(['/report']);
-
   }
 }
