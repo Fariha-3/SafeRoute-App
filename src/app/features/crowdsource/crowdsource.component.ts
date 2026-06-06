@@ -6,6 +6,7 @@ import { FirebaseService } from '../../m-framework/services/firebase.service';
 import { MContainerComponent } from '../../m-framework/components/m-container/m-container.component';
 import { auth } from '../../firebase.config';
 import { CommunityService } from '../../services/community.service';
+import { GeminiService } from '../../m-framework/services/gemini.service';
 
 @Component({
   selector: 'app-crowdsource',
@@ -15,7 +16,6 @@ import { CommunityService } from '../../services/community.service';
   styleUrl: './crowdsource.component.css'
 })
 export class CrowdsourceComponent {
-
   report = {
     category: '',
     severity: '',
@@ -28,13 +28,18 @@ export class CrowdsourceComponent {
     userEmail: ''
   };
 
+  hazardType = '';
+  authority = '';
+  recommendedAction = '';
+
   message = '';
   error = '';
 
   constructor(
     private router: Router,
     private firebase: FirebaseService,
-    private communityService: CommunityService
+    private communityService: CommunityService,
+    private geminiService: GeminiService
   ) {}
 
   addReport() {
@@ -59,39 +64,59 @@ export class CrowdsourceComponent {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        try {
+          const geminiResult = await this.geminiService.analyzeReport(
+            this.report.category,
+            this.report.description
+          );
 
-        const reportData = {
-          category: this.report.category,
-          severity: this.report.severity,
-          description: this.report.description,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          timestamp: new Date().toISOString(),
-          verified: false,
-          userId: currentUser.uid,
-          userEmail: currentUser.email || ''
-        };
+          this.hazardType = geminiResult.hazardType;
+          this.authority = geminiResult.authority;
+          this.recommendedAction = geminiResult.recommendedAction;
 
-        console.log('Saving report:', reportData);
+          const reportData = {
+            category: this.report.category,
+            severity: this.report.severity,
+            description: this.report.description,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            timestamp: new Date().toISOString(),
+            verified: false,
+            userId: currentUser.uid,
+            userEmail: currentUser.email || '',
+            hazardType: this.hazardType,
+            authority: this.authority,
+            recommendedAction: this.recommendedAction
+          };
 
-        const key = this.firebase.pushToList('reports', reportData);
-        console.log('Firebase key:', key);
+          console.log('Saving report:', reportData);
 
-        await this.communityService.increaseReportCountForUser(currentUser.uid);
+          const key = this.firebase.pushToList('reports', reportData);
+          console.log('Firebase key:', key);
 
-        this.message = 'Report submitted successfully.';
+          await this.communityService.increaseReportCountForUser(currentUser.uid);
 
-        this.report = {
-          category: '',
-          severity: '',
-          description: '',
-          latitude: 0,
-          longitude: 0,
-          timestamp: '',
-          verified: false,
-          userId: '',
-          userEmail: ''
-        };
+          this.message = 'Report submitted successfully.';
+
+          this.report = {
+            category: '',
+            severity: '',
+            description: '',
+            latitude: 0,
+            longitude: 0,
+            timestamp: '',
+            verified: false,
+            userId: '',
+            userEmail: ''
+          };
+
+          this.hazardType = '';
+          this.authority = '';
+          this.recommendedAction = '';
+        } catch (error) {
+          console.error(error);
+          this.error = 'Gemini analysis failed or Firebase error.';
+        }
       },
       (error) => {
         console.error(error);

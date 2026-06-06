@@ -1,0 +1,36 @@
+<h2>Submit Hazard Report</h2>
+
+<label>Category</label>
+<select [(ngModel)]="category">
+  <option value="">Select Category</option>
+  <option value="Road Hazard">Road Hazard</option>
+  <option value="Traffic Issue">Traffic Issue</option>
+  <option value="Utilities">Utilities</option>
+</select>
+
+<br><br>
+
+<label>Description</label>
+<textarea
+  [(ngModel)]="description"
+  rows="5">
+</textarea>
+
+<br><br>
+
+<button (click)="submitReport()">
+  Submit Report
+</button>
+
+<div *ngIf="hazardType">
+
+  <h3>AI Analysis</h3>
+
+  <p><strong>Hazard Type:</strong> {{ hazardType }}</p>
+
+  <p><strong>Authority:</strong> {{ authority }}</p>
+
+  <p><strong>Recommended Action:</strong> {{ recommendedAction }}</p>
+
+</div>
+

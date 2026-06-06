@@ -102,6 +102,11 @@
         <span>Upvotes: <strong>{{ report.upvoteCount }}</strong></span>
         <span>Disputes: <strong>{{ report.disputeCount }}</strong></span>
       </div>
+  <button class="btn btn-primary" (click)="navigateToMap()">
+  Go to Map
+</button>
+
+  
 
       <div class="report-actions">
         <button class="small-btn" (click)="upvote(report.id)">Upvote</button>
