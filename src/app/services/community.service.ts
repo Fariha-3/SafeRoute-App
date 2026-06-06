@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ref, get, update, runTransaction } from 'firebase/database';
 import { auth, db } from '../firebase.config';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommunityService {
+
+  constructor(
+    private notificationService: NotificationService
+  ) {}
 
   async getReports(): Promise<any[]> {
     const snapshot = await get(ref(db, 'reports'));
@@ -61,7 +66,7 @@ export class CommunityService {
 
     await this.increaseUserValue(report.userId, 'upvotesReceived', 1);
 
-    // Each upvote now gives 2 safety score points
+    // Each upvote gives 2 safety score points
     await this.increaseUserValue(report.userId, 'safetyScore', 2);
 
     const newUpvoteCount = Object.keys({
@@ -76,6 +81,14 @@ export class CommunityService {
 
       await this.increaseUserValue(report.userId, 'verifiedReportCount', 1);
       await this.increaseUserValue(report.userId, 'safetyScore', 25);
+
+      await this.notificationService.createNotification(
+        report.userId,
+        'Report Verified',
+        'Your report has been verified by the community after receiving 3 upvotes.',
+        'REPORT_VERIFIED',
+        reportId
+      );
     }
   }
 
