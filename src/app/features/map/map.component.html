@@ -74,8 +74,64 @@
 
 </div>
 
+<div class="route-card">
+
+  <div class="route-header">
+    <div>
+      <h3>Safe Route Suggestion</h3>
+      <p>Enter a destination to check route safety</p>
+    </div>
+  </div>
+
+  <div class="route-input-row">
+    <input
+      type="text"
+      placeholder="Enter destination, e.g. Dubai Mall"
+      [(ngModel)]="routeDestination"
+    />
+
+    <button type="button" (click)="drawDefaultRoute()">
+      Draw Route
+    </button>
+  </div>
+
+</div>
+
     <!-- Google Map -->
     <div id="map"></div>
+
+    <div class="route-message-box" *ngIf="showRouteBox">
+  <div class="route-message-header">
+    <h3>Route Status</h3>
+    <button type="button" (click)="closeRouteBox()">×</button>
+  </div>
+
+  <p>{{ routeMessage }}</p>
+
+  <div class="route-actions" *ngIf="showRouteActions">
+  <button type="button" class="accept-route-btn" (click)="acceptOriginalRoute()">
+    Accept Route
+  </button>
+
+  <div class="route-advisory" *ngIf="showRouteAdvisory">
+  <div class="route-advisory-header">
+    <span>AI Safety Advisory</span>
+  </div>
+
+  <p>{{ routeAdvisory }}</p>
+</div>
+
+  <button type="button" class="alternate-route-btn" (click)="requestAlternateRoute()">
+    Request Alternate
+  </button>
+</div>
+
+<p class="accepted-message" *ngIf="acceptedRouteMessage">
+  {{ acceptedRouteMessage }}
+</p>
+
+
+</div>
 
     <!-- Box shown when Load Reports is clicked -->
 <div class="filtered-panel" *ngIf="showFilteredReportsBox">
