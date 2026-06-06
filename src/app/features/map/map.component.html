@@ -99,6 +99,54 @@
 
     <!-- Google Map -->
     <div id="map"></div>
+    <button type="button" class="sos-floating-btn" (click)="findNearestEmergencyPlaces()">
+  SOS
+</button>
+
+<div class="sos-map-panel" *ngIf="showSOSPanel">
+
+  <div class="sos-map-header">
+    <div>
+      <h3>Emergency SOS</h3>
+      <p>{{ sosMessage || 'Find nearby emergency help on the map' }}</p>
+    </div>
+
+    <button type="button" class="sos-map-close" (click)="showSOSPanel = false">
+      ×
+    </button>
+  </div>
+
+  <div class="sos-map-list" *ngIf="emergencyPlaces.length > 0">
+    <div class="sos-place-card" *ngFor="let place of emergencyPlaces">
+
+      <div class="sos-place-main" (click)="focusEmergencyPlace(place)">
+        <div
+          class="sos-place-icon"
+          [class.hospital-icon]="place.type === 'Hospital'"
+          [class.police-icon]="place.type === 'Police Station'">
+          {{ place.type === 'Hospital' ? 'H' : 'P' }}
+        </div>
+
+        <div>
+          <h4>{{ place.name }}</h4>
+          <p>{{ place.type }} • {{ formatDistance(place.distanceMeters) }}</p>
+          <small>{{ place.vicinity }}</small>
+        </div>
+      </div>
+
+      <button type="button" class="sos-route-btn" (click)="navigateToEmergencyPlace(place)">
+        Route
+      </button>
+
+    </div>
+  </div>
+
+  <div class="sos-empty" *ngIf="emergencyPlaces.length === 0">
+    <div>🚨</div>
+    <p>Nearest hospitals and police stations will appear here.</p>
+  </div>
+
+</div>
 
     <div class="route-message-box" *ngIf="showRouteBox">
   <div class="route-message-header">
