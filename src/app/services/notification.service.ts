@@ -63,10 +63,7 @@ export class NotificationService {
     const data = snapshot.val();
 
     return Object.keys(data)
-      .map((id) => ({
-        id,
-        ...data[id]
-      }))
+      .map((id) => ({ id, ...data[id] }))
       .filter((notification) => !notification.read)
       .sort((a, b) => {
         const timeA = new Date(a.timestamp || 0).getTime();
