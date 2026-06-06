@@ -4,6 +4,7 @@ import { FirebaseService } from '../../m-framework/services/firebase.service';
 import { CommonModule, Location } from '@angular/common';
 import { MAhaComponent } from "../../m-framework/components/m-aha/m-aha.component";
 import { FormsModule } from '@angular/forms';
+import { GeminiService } from '../../m-framework/services/gemini.service';
 
 declare var google:any;
 interface SafetyReport {
@@ -78,7 +79,8 @@ timeRanges: string[] = [
   constructor(
   private firebase: FirebaseService,
   private location: Location,
-  private ngZone: NgZone
+  private ngZone: NgZone,
+  private gemini: GeminiService
 ) {
   this.latitude = 0;
   this.longitude = 0;
@@ -341,7 +343,7 @@ closeReportBox() {
 
 closeFilteredReportsBox() {
   this.showFilteredReportsBox = false;
-  this.filteredReports = [];
+  
 }
 
 drawDefaultRoute() {
@@ -425,8 +427,7 @@ checkRouteSafety(routeResult: any, routeIndex: number = 0)  {
   }
 
   this.showRouteBox = true;
-  this.generateRouteAdvisory();
-
+  void this.generateRouteAdvisory();
   console.log('Unsafe reports near route:', this.unsafeRouteReports);
 }
 
@@ -505,7 +506,7 @@ requestAlternateRoute() {
         report.severity &&
         report.severity.toLowerCase() === 'high';
 
-      return isHighSeverity && this.isReportNearRoute(report, routePath);
+      return isHighSeverity && this.isActiveReport(report) && this.isReportNearRoute(report, routePath);
     });
 
     if (unsafeReportsForRoute.length < lowestUnsafeCount) {
@@ -535,30 +536,42 @@ requestAlternateRoute() {
   console.log('Alternate route selected:', bestRouteIndex);
 }
 
-generateRouteAdvisory() {
-  if (this.unsafeRouteReports.length > 0) {
-    const hazardCount = this.unsafeRouteReports.length;
+async generateRouteAdvisory() {
+  this.showRouteAdvisory = true;
 
-    const categories = [
-      ...new Set(this.unsafeRouteReports.map(report => report.category))
-    ].join(', ');
+  this.routeAdvisory = 'Generating safety advisory...';
 
-    this.routeAdvisory =
-      `This route passes near ${hazardCount} high-severity hazard zone(s), including ${categories}. ` +
-      `Please avoid stopping near the highlighted areas. Consider requesting an alternate route if available.`;
+  try {
+    const advisory = await this.gemini.generateRouteSafetyAdvisory(
+      this.routeDestination,
+      this.unsafeRouteReports,
+      this.selectedRouteIndex
+    );
 
-    this.showRouteAdvisory = true;
-  } else {
-    this.routeAdvisory =
-      `This route appears safe based on current high-severity reports. ` +
-      `No major hazard zones were detected near the selected route.`;
+    this.ngZone.run(() => {
+      this.routeAdvisory = advisory;
+      this.showRouteAdvisory = true;
+    });
 
-    this.showRouteAdvisory = true;
+  } catch (error) {
+    console.error('Failed to generate route advisory:', error);
+
+    this.ngZone.run(() => {
+      if (this.unsafeRouteReports.length > 0) {
+        this.routeAdvisory =
+          `This route passes near ${this.unsafeRouteReports.length} high-severity hazard zone(s). Please stay alert and consider requesting an alternate route.`;
+      } else {
+        this.routeAdvisory =
+          'This route appears safe based on current high-severity reports.';
+      }
+
+      this.showRouteAdvisory = true;
+    });
   }
 }
 
 isReportNearRoute(report: SafetyReport, routePath: any[]): boolean {
-  const dangerDistanceMeters = 250;
+  const dangerDistanceMeters = 400;
 
   const reportLat = Number(report.latitude);
   const reportLng = Number(report.longitude);
