@@ -6,25 +6,20 @@ import {
   GenerateContentResponse
 } from '@google/generative-ai';
 
-export const environment = {
-  production: false,
-  geminiApiKey: 'AIzaSyDGO2Y2vF1VQmt8WPJYPZj80gJ9olWZgF8'
-};
+import { API_KEYS } from '../../config/api-keys';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GeminiService {
 
-  private readonly apiKey = environment.geminiApiKey;
   private readonly mode = 'gemini-2.5-flash';
   private genAI: GoogleGenerativeAI;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(this.apiKey);
+    this.genAI = new GoogleGenerativeAI(API_KEYS.gemini);
   }
 
-  
   async analyzeReport(category: string, description: string): Promise<any> {
 
     const model = this.genAI.getGenerativeModel({
@@ -32,21 +27,23 @@ export class GeminiService {
     });
 
     const prompt = `
-    You are a strict JSON generator.
-    You MUST respond ONLY with valid JSON.
-    Do NOT add explanations.
-    Do NOT use markdown.
-    Do NOT wrap in backticks.
-    Output format:
-    {
-    "hazardType": "string",
-    "authority": "Municipality | Traffic Police | Utilities | Civil Defense",
-    "recommendedAction": "string"
-    }
-    Now analyze:
-    Category: ${category}
-    Description: ${description}
-    `;
+You are a strict JSON generator.
+You MUST respond ONLY with valid JSON.
+Do NOT add explanations.
+Do NOT use markdown.
+Do NOT wrap in backticks.
+
+Output format:
+{
+  "hazardType": "string",
+  "authority": "Municipality | Traffic Police | Utilities | Civil Defense",
+  "recommendedAction": "string"
+}
+
+Now analyze:
+Category: ${category}
+Description: ${description}
+`;
 
     const result = await model.generateContent(prompt);
     const response = result.response;

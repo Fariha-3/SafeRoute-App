@@ -41,4 +41,5 @@ testem.log
 .DS_Store
 Thumbs.db
 
+#gemini api
 src/app/config/api-keys.ts
