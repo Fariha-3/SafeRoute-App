@@ -16,6 +16,13 @@ interface SafetyReport {
   longitude: number;
   timestamp: string;
 }
+interface EmergencyPlace {
+  name: string;
+  type: 'Hospital' | 'Police Station';
+  vicinity: string;
+  location: any;
+  distanceMeters: number;
+}
 
 @Component({
   selector: 'app-map',
@@ -53,6 +60,11 @@ export class MapComponent {
   acceptedRouteMessage: string = '';
   routeAdvisory: string = '';
   showRouteAdvisory: boolean = false;
+  showSOSPanel: boolean = false;
+sosMessage: string = '';
+emergencyPlaces: EmergencyPlace[] = [];
+emergencyMarkers: any[] = [];
+placesService!: any;
 
 
 categories: string[] = [
@@ -134,6 +146,7 @@ toggleFilter() {
 
   this.mapElementRef = document.getElementById('map') as HTMLElement;
   this.map = new google.maps.Map(this.mapElementRef, mapOptions);
+  this.initializeSOSService();
   this.initializeRouteServices();
 
   this.addMarker();
@@ -686,6 +699,166 @@ clearUnsafeRouteCircles() {
 
 closeRouteBox() {
   this.showRouteBox = false;
+}
+initializeSOSService() {
+  if (google.maps.places && google.maps.places.PlacesService) {
+    this.placesService = new google.maps.places.PlacesService(this.map);
+  } else {
+    console.error('Google Places library is not loaded. Add libraries=places in index.html.');
+  }
+}
+findNearestEmergencyPlaces() {
+  this.showSOSPanel = true;
+  this.sosMessage = 'Searching for nearby emergency help...';
+  this.emergencyPlaces = [];
+  this.clearEmergencyMarkers();
+
+  if (!this.placesService) {
+    this.sosMessage = 'Places service is not loaded. Check that libraries=places is added in index.html.';
+    return;
+  }
+
+  Promise.all([
+    this.searchEmergencyType('hospital', 'Hospital'),
+    this.searchEmergencyType('police', 'Police Station')
+  ]).then((results) => {
+    const combinedPlaces = [...results[0], ...results[1]]
+      .sort((a, b) => a.distanceMeters - b.distanceMeters)
+      .slice(0, 6);
+
+    this.ngZone.run(() => {
+      this.emergencyPlaces = combinedPlaces;
+
+      if (this.emergencyPlaces.length > 0) {
+        this.sosMessage = `${this.emergencyPlaces.length} nearby emergency location(s) found.`;
+        this.addEmergencyMarkers();
+      } else {
+        this.sosMessage = 'No nearby hospital or police station found within 5 km.';
+      }
+    });
+  });
+}
+searchEmergencyType(placeType: string, label: 'Hospital' | 'Police Station'): Promise<EmergencyPlace[]> {
+  return new Promise((resolve) => {
+    const currentLocation = new google.maps.LatLng(this.latitude, this.longitude);
+
+    const request = {
+      location: currentLocation,
+      radius: 5000,
+      type: placeType
+    };
+
+    this.placesService.nearbySearch(request, (results: any[], status: any) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        const places: EmergencyPlace[] = results
+          .filter(place => place.geometry && place.geometry.location)
+          .map(place => {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+
+            return {
+              name: place.name || label,
+              type: label,
+              vicinity: place.vicinity || 'Address not available',
+              location: place.geometry.location,
+              distanceMeters: this.calculateDistance(
+                this.latitude,
+                this.longitude,
+                lat,
+                lng
+              )
+            };
+          });
+
+        resolve(places);
+      } else {
+        console.log(`${label} search failed:`, status);
+        resolve([]);
+      }
+    });
+  });
+}
+addEmergencyMarkers() {
+  this.clearEmergencyMarkers();
+
+  this.emergencyPlaces.forEach(place => {
+    const marker = new google.maps.Marker({
+      map: this.map,
+      position: place.location,
+      title: place.name,
+      label: {
+        text: place.type === 'Hospital' ? 'H' : 'P',
+        color: 'white',
+        fontWeight: 'bold'
+      },
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 14,
+        fillColor: place.type === 'Hospital' ? '#2563eb' : '#7c3aed',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2
+      },
+      zIndex: 80
+    });
+
+    marker.addListener('click', () => {
+      this.ngZone.run(() => {
+        this.navigateToEmergencyPlace(place);
+      });
+    });
+
+    this.emergencyMarkers.push(marker);
+  });
+
+  if (this.emergencyPlaces.length > 0) {
+    this.map.panTo(this.emergencyPlaces[0].location);
+  }
+}
+clearEmergencyMarkers() {
+  this.emergencyMarkers.forEach(marker => marker.setMap(null));
+  this.emergencyMarkers = [];
+}
+navigateToEmergencyPlace(place: EmergencyPlace) {
+  const origin = {
+    lat: this.latitude,
+    lng: this.longitude
+  };
+
+  const request = {
+    origin: origin,
+    destination: place.location,
+    travelMode: google.maps.TravelMode.DRIVING
+  };
+
+  this.directionsService.route(request, (result: any, status: any) => {
+    if (status === 'OK') {
+      this.directionsRenderer.setDirections(result);
+
+      this.ngZone.run(() => {
+        this.routeMessage = `Route started to ${place.name}.`;
+        this.showRouteBox = true;
+        this.showSOSPanel = false;
+      });
+    } else {
+      console.error('Emergency route failed:', status);
+
+      this.ngZone.run(() => {
+        this.sosMessage = 'Could not draw route to this emergency location.';
+      });
+    }
+  });
+}
+focusEmergencyPlace(place: EmergencyPlace) {
+  this.map.panTo(place.location);
+  this.map.setZoom(16);
+}
+formatDistance(distanceMeters: number): string {
+  if (distanceMeters < 1000) {
+    return `${Math.round(distanceMeters)} m`;
+  }
+
+  return `${(distanceMeters / 1000).toFixed(1)} km`;
 }
 
 }
