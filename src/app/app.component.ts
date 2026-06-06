@@ -5,7 +5,6 @@ import { MCardComponent } from './m-framework/components/m-card/m-card.component
 import { MContainerComponent } from './m-framework/components/m-container/m-container.component';
 import { CommonModule } from '@angular/common';
 
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -20,9 +19,5 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  title = 'DeliveryApp';
-
-  constructor() {
-  
-  }
+  title = 'SafeRoute';
 }

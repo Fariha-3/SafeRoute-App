@@ -1,4 +1,56 @@
-<m-container>
-    <br><br>
-    Feature 1
-</m-container>
+<div class="app-shell">
+
+  <header class="top-bar">
+    <div>
+      <h1>SafeRoute</h1>
+      <p>Community-powered urban safety reporting</p>
+    </div>
+  </header>
+
+  <p class="success" *ngIf="message">{{ message }}</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <main class="auth-page">
+
+    <section class="hero">
+      <h2>Stay aware. Report hazards. Travel safer.</h2>
+      <p>
+        Login or register to submit safety reports, verify community reports,
+        and access SafeRoute features.
+      </p>
+    </section>
+
+    <section class="auth-grid">
+
+      <div class="auth-card">
+        <h2>Login</h2>
+        <p class="card-subtitle">Already have an account?</p>
+
+        <label>Email</label>
+        <input type="email" [(ngModel)]="loginEmail" placeholder="Enter your email">
+
+        <label>Password</label>
+        <input type="password" [(ngModel)]="loginPassword" placeholder="Enter your password">
+
+        <button class="primary-btn" (click)="login()">Login</button>
+      </div>
+
+      <div class="auth-card">
+        <h2>Register</h2>
+        <p class="card-subtitle">Create a SafeRoute account.</p>
+
+        <label>Name</label>
+        <input type="text" [(ngModel)]="registerName" placeholder="Enter your name">
+
+        <label>Email</label>
+        <input type="email" [(ngModel)]="registerEmail" placeholder="Enter your email">
+
+        <label>Password</label>
+        <input type="password" [(ngModel)]="registerPassword" placeholder="Minimum 6 characters">
+
+        <button class="secondary-btn" (click)="register()">Register</button>
+      </div>
+
+    </section>
+  </main>
+</div>

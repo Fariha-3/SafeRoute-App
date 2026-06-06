@@ -1,0 +1,61 @@
+.app-wrapper {
+  min-height: 100vh;
+  background: #f5f7fb;
+}
+
+.main-header {
+  background: #b91c1c;
+  color: white;
+  padding: 18px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.brand p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.nav-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.nav-links a:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.main-content {
+  padding: 20px;
+}
+
+@media (max-width: 800px) {
+  .main-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .nav-links {
+    gap: 8px;
+  }
+}
