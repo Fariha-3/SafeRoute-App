@@ -110,9 +110,7 @@ export class CrowdsourceComponent {
             userEmail: ''
           };
 
-          this.hazardType = '';
-          this.authority = '';
-          this.recommendedAction = '';
+          
         } catch (error) {
           console.error(error);
           this.error = 'Gemini analysis failed or Firebase error.';
